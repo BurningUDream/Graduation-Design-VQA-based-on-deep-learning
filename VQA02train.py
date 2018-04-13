@@ -142,7 +142,7 @@ def main():
         criterion = nn.BCELoss(size_average=False)
 
     optimizer = torch.optim.Adam(model.parameters(), args.lr, weight_decay=args.wd)
-    scheduler = StepLR(optimizer, step_size=4, gamma=0.5)
+    scheduler = StepLR(optimizer, step_size=1, gamma=0.5)
     # This flag allows you to enable the inbuilt cudnn auto-tuner to find the best algorithm to use for your hardware.
     # It enables benchmark mode in cudnn.
     # benchmark mode is good whenever your input sizes for your network do not vary.
