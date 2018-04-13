@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import Variable
+import math
 
 class CSF(nn.Module):
     def __init__(self, img_size, h_size, latent_dim, output_size, block_count):#img_size=[C,H,W]
@@ -48,37 +49,42 @@ class CSF(nn.Module):
         return img
 
 class CS(nn.Module):
-    def __init__(self, img_size, h_size, latent_dim, output_size, block_count):#img_size=[C,H,W]
+    def __init__(self, img_size, h_size, k_size=512):#img_size=[C,H,W]
         super(CS,self).__init__()
-        # x为(batch_size,36,2048) or (batch_size,2048), y为(batch_size,2048) => (batch_size,36,o) or (batch_size,o)
-        self.att_c_mfh = MFH(x_size=img_size[1]*img_size[2], y_size=h_size, latent_dim=latent_dim, output_size=output_size,block_count=block_count)
-        self.att_c_net = nn.Sequential(
-            nn.Linear(output_size*block_count, 512),
-            nn.Tanh(),
-            nn.Linear(512, 1))
-
-        # x为(batch_size,36,2048) or (batch_size,2048), y为(batch_size,2048) => (batch_size,36,o) or (batch_size,o)
-        self.att_s_mfh = MFH(x_size=img_size[0], y_size=h_size, latent_dim=latent_dim, output_size=output_size,block_count=block_count)
-        self.att_s_net = nn.Sequential(
-            nn.Linear(output_size*block_count, 512),
-            nn.Tanh(),
-            nn.Linear(512, 1))
 
         self.avgpool=nn.AvgPool1d(kernel_size=img_size[1]*img_size[2],stride=1)
 
         #自定义参数 channel-wise attention
-        self.wc = nn.Parameter(torch.Tensor(latent_dim, 1), requires_grad=True) #(k,1)
-        self.bc = nn.Parameter(torch.Tensor(latent_dim, 1), requires_grad=True) #(k,1)
-        self.whc = nn.Parameter(torch.Tensor(latent_dim, h_size), requires_grad=True) #(k,h)
-        self.wci = nn.Parameter(torch.Tensor(1, latent_dim), requires_grad=True) #(1,k)
+        self.wc = nn.Parameter(torch.Tensor(k_size, 1), requires_grad=True) #(k,1)
+        self.bc = nn.Parameter(torch.Tensor(k_size, 1), requires_grad=True) #(k,1)
+        self.whc = nn.Parameter(torch.Tensor(k_size, h_size), requires_grad=True) #(k,h)
+        self.wci = nn.Parameter(torch.Tensor(1, k_size), requires_grad=True) #(1,k)
         self.bci = nn.Parameter(torch.Tensor(1, 1), requires_grad=True) #(1,1)
 
         #自定义参数 spacial-wise attention
-        self.ws = nn.Parameter(torch.Tensor(latent_dim, img_size[0]), requires_grad=True) #(k,C)
-        self.bs = nn.Parameter(torch.Tensor(latent_dim, 1), requires_grad=True) #(k,1)
-        self.whs = nn.Parameter(torch.Tensor(latent_dim, h_size), requires_grad=True) #(k,h)
-        self.wsi = nn.Parameter(torch.Tensor(1, latent_dim), requires_grad=True) #(1,k)
+        self.ws = nn.Parameter(torch.Tensor(k_size, img_size[0]), requires_grad=True) #(k,C)
+        self.bs = nn.Parameter(torch.Tensor(k_size, 1), requires_grad=True) #(k,1)
+        self.whs = nn.Parameter(torch.Tensor(k_size, h_size), requires_grad=True) #(k,h)
+        self.wsi = nn.Parameter(torch.Tensor(1, k_size), requires_grad=True) #(1,k)
         self.bsi = nn.Parameter(torch.Tensor(1, 1), requires_grad=True) #(1,1)
+
+        #initialization
+        self.init_parameters()
+
+    def init_parameters(self):
+        #init c
+        nn.init.xavier_uniform(self.wc)
+        nn.init.xavier_uniform(self.bc)
+        nn.init.xavier_uniform(self.whc)
+        nn.init.xavier_uniform(self.wci)
+        nn.init.xavier_uniform(self.bci)
+        #init s
+        nn.init.xavier_uniform(self.ws)
+        nn.init.xavier_uniform(self.bs)
+        nn.init.xavier_uniform(self.whs)
+        nn.init.xavier_uniform(self.wsi)
+        nn.init.xavier_uniform(self.bsi)
+
 
     def forward(self,img,h):#(bs,C,7,7) (bs,h_size) => (bs,C,7,7)
         #c

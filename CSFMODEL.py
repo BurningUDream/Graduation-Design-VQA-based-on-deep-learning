@@ -16,14 +16,14 @@ import numpy as np
 from PIL import Image
 import sys
 import resnet
-from modules import MFH, GatedTanh, CSF
+from modules import MFH, GatedTanh, CSF, CS
 
 stdModule = resnet.resnet152(True)
 #print(list(list(stdModule.layer4.children())[0:-1]))
 
-
+#CSFMODEL(args.l, args.s, args.g, len(train_set.codebook['itow']), len(train_set.codebook['itoa']) + 1, hidden_size=1024, emb_size=emb_size)
 class CSFMODEL(nn.Module):
-    def __init__(self, layers, num_words, num_ans,  hidden_size=512, emb_size=300, inplanes=512 * 4, planes=512, stride=1):
+    def __init__(self, layers, submodel, grad, num_words, num_ans,  hidden_size=512, emb_size=300, inplanes=512 * 4, planes=512, stride=1):
         super(CSFMODEL, self).__init__()
         self.layers=layers
         self.conv1 = nn.Conv2d(inplanes, planes, kernel_size=1, bias=False)
@@ -45,9 +45,15 @@ class CSFMODEL(nn.Module):
         self.grudp = nn.Dropout(0.3)
 
         # CSF(img_size, h_size, latent_dim, output_size, block_count)  img_size=[C,H,W]
-        self.csf1 = CSF((512, 7, 7), hidden_size, 4, 1024, 2)
-        self.csf2 = CSF((512, 7, 7), hidden_size, 4, 1024, 2)
-        self.csf3 = CSF((2048, 7, 7), hidden_size, 4, 1024, 2)
+        if submodel=='csf':
+            self.csf1 = CSF((512, 7, 7), hidden_size, 4, 1024, 2)
+            self.csf2 = CSF((512, 7, 7), hidden_size, 4, 1024, 2)
+            self.csf3 = CSF((2048, 7, 7), hidden_size, 4, 1024, 2)
+        else:
+            #(self, img_size, h_size, k_size=512)
+            self.csf1 = CS((512, 7, 7), hidden_size, k_size=512)
+            self.csf2 = CS((512, 7, 7), hidden_size, k_size=512)
+            self.csf3 = CS((2048, 7, 7), hidden_size, k_size=512)
 
         self.relu = nn.ReLU(inplace=True)
         self.avgpool = nn.AvgPool2d(7, stride=1)
@@ -79,10 +85,11 @@ class CSFMODEL(nn.Module):
         self.bn1.weight = nn.Parameter(list(stdbn1.parameters())[0].data.clone())
         self.bn1.bias = nn.Parameter(list(stdbn1.parameters())[1].data.clone())
 
-        for param in list(self.conv1.parameters()):
-            param.requires_gard = False
-        for param in list(self.bn1.parameters()):
-            param.requires_gard = False
+        if not grad :
+            for param in list(self.conv1.parameters()):
+                param.requires_gard = False
+            for param in list(self.bn1.parameters()):
+                param.requires_gard = False
 
         stdconv2 = list(stdModule.layer4.children())[2].conv2
         self.conv2.weight = nn.Parameter(list(stdconv2.parameters())[0].data.clone())
@@ -91,10 +98,11 @@ class CSFMODEL(nn.Module):
         self.bn2.weight = nn.Parameter(list(stdbn2.parameters())[0].data.clone())
         self.bn2.bias = nn.Parameter(list(stdbn2.parameters())[1].data.clone())
 
-        for param in list(self.conv2.parameters()):
-            param.requires_gard = False
-        for param in list(self.bn2.parameters()):
-            param.requires_gard = False
+        if (not grad) or (grad and layers<3 ) :
+            for param in list(self.conv2.parameters()):
+                param.requires_gard = False
+            for param in list(self.bn2.parameters()):
+                param.requires_gard = False
 
         stdconv3 = list(stdModule.layer4.children())[2].conv3
         self.conv3.weight = nn.Parameter(list(stdconv3.parameters())[0].data.clone())
@@ -103,10 +111,11 @@ class CSFMODEL(nn.Module):
         self.bn3.weight = nn.Parameter(list(stdbn3.parameters())[0].data.clone())
         self.bn3.bias = nn.Parameter(list(stdbn3.parameters())[1].data.clone())
 
-        for param in list(self.conv3.parameters()):
-            param.requires_gard = False
-        for param in list(self.bn3.parameters()):
-            param.requires_gard = False
+        if (not grad) or (grad and layers<2) :
+            for param in list(self.conv3.parameters()):
+                param.requires_gard = False
+            for param in list(self.bn3.parameters()):
+                param.requires_gard = False
 
 
     def forward(self, que, img):  # img: [bs,2048,7,7] que: (bs,14)

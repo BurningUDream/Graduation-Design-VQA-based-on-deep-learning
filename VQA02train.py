@@ -34,16 +34,20 @@ from MFHMODEL import MFHMODEL
 from MFHBaseline import MFHBaseline
 
 parser = argparse.ArgumentParser(description="VQA")
-parser.add_argument("-gpu", type=int, action="store", help="gpu_index", default=1)
+
 parser.add_argument("-bs", type=int, action="store", help="BATCH_SIZE", default=10)
 parser.add_argument("-lr", type=float, action="store", help="learning rate", default=7e-4)
 parser.add_argument("-wd", type=float, action="store", help="weight decay", default=0)
 parser.add_argument("-epoch", type=int, action="store", help="epoch", default=10)
-parser.add_argument("-l", type=int, action="store", help="num of CSF layers", default=3)
 parser.add_argument("-e", type=float, action="store", help="extend for score", default=1.0)
+parser.add_argument('--print-freq', '-p', default=2000, type=int, metavar='N', help='print frequency (default: 1000)')
+
+parser.add_argument("-gpu", type=int, action="store", help="gpu_index", default=1)
+parser.add_argument("-l", type=int, action="store", help="num of CSF layers", default=3)
 parser.add_argument("-f",type=int, action="store",help="use freq in answer rather than grade",default=0)
 parser.add_argument("-m",type=str,nargs=1,choices=['c','m','b'],help="model",default='b')#c: CSFMODEL m: MFHMODEL b: MFHBaseline
-parser.add_argument('--print-freq', '-p', default=2000, type=int, metavar='N', help='print frequency (default: 1000)')
+parser.add_argument("-s",type=str,nargs=1,choices=['cs','csf'],help="model",default='csf')#cs: CS csf: CSF
+parser.add_argument("-g",type=int, action="store",help="grad to fine tune on the conv",default=0)
 
 args = parser.parse_args()
 
@@ -59,7 +63,7 @@ logger.setLevel(logging.DEBUG)  # 接收DEBUG即以上的log info
 
 
 def main():
-    fh = logging.FileHandler('./current_model_{}_freq_{}_layer_{}.log'.format(args.m,args.f,args.l))  # log info 输入到文件
+    fh = logging.FileHandler('./current_{}_freq_{}_layer_{}_{}_{}.log'.format(args.m,args.f,args.l,args.s,args.g))  # log info 输入到文件
     fh.setLevel(logging.DEBUG)
     sh = logging.StreamHandler(sys.stdout)  # log info 输入到屏幕
     sh.setLevel(logging.DEBUG)
@@ -104,11 +108,11 @@ def main():
 
     # 建立模型
     if args.m=='c':
-        model = CSFMODEL(args.l, len(train_set.codebook['itow']), len(train_set.codebook['itoa']) + 1, hidden_size=1024, emb_size=emb_size)
+        model = CSFMODEL(args.l, args.s, args.g, len(train_set.codebook['itow']), len(train_set.codebook['itoa']) + 1, hidden_size=1024, emb_size=emb_size)
     elif args.m=='m':
-        model = MFHMODEL(args.l, len(train_set.codebook['itow']), len(train_set.codebook['itoa']) + 1, hidden_size=1024, emb_size=emb_size,co_att=False)
+        model = MFHMODEL(args.l, args.s, args.g, len(train_set.codebook['itow']), len(train_set.codebook['itoa']) + 1, hidden_size=1024, emb_size=emb_size,co_att=False)
     else:
-        model = MFHBaseline(args.l, len(train_set.codebook['itow']), len(train_set.codebook['itoa']) + 1, hidden_size=1024, emb_size=emb_size, co_att=False)
+        model = MFHBaseline(args.l, args.s, args.g, len(train_set.codebook['itow']), len(train_set.codebook['itoa']) + 1, hidden_size=1024, emb_size=emb_size, co_att=False)
 
 
     total_param = 0
