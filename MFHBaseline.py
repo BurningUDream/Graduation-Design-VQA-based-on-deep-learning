@@ -112,6 +112,7 @@ class MFHBaseline(nn.Module):
 
         stdconv3 = list(stdModule.layer4.children())[2].conv3
         self.conv3.weight = nn.Parameter(list(stdconv3.parameters())[0].data.clone())
+        print("[type test: ]",self.conv3.weight.size())
 
         stdbn3 = list(stdModule.layer4.children())[2].bn3
         self.bn3.weight = nn.Parameter(list(stdbn3.parameters())[0].data.clone())
