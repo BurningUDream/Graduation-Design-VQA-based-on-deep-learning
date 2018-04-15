@@ -189,13 +189,11 @@ def main():
 def extract_embedding(filepath):
     logger.debug('[Load] ' + filepath)
     with open(filepath, 'r') as f:
-        word_vec_txt = [l.rstrip().split(' ', 1) for l in
-                        f.readlines()]  # rstrip()去掉末尾的空白和换行符 2d list [[word,embedding]...]
+        word_vec_txt = [l.rstrip().split(' ', 1) for l in f.readlines()]  # rstrip()去掉末尾的空白和换行符 2d list [[word,embedding]...]
     vocab, vec_txt = zip(*word_vec_txt)  # tuple of words, tuple of embedding (word,...) (embedding string,...)
     embedding_size = len(vec_txt[0].split())
     # fromstring faster than loadtxt
-    vector = np.fromstring(' '.join(vec_txt), dtype='float32',
-                           sep=' ')  # 将string转为float32，fromstring用来分割文本并转化类型 1d ndarray of float32
+    vector = np.fromstring(' '.join(vec_txt), dtype='float32', sep=' ')  # 将string转为float32，fromstring用来分割文本并转化类型 1d ndarray of float32
     vector = vector.reshape(-1, embedding_size)  # ndarray of 2d (num of word, embedding length)
     word_vec = {}  # dict word->embedding
     for i, word in enumerate(vocab):
