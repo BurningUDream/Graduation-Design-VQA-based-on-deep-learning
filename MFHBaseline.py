@@ -65,12 +65,6 @@ class MFHBaseline(nn.Module):
             self.csf3 = CS((2048, 7, 7), cfg.NUM_QUESTION_GLIMPSE * hidden_size, k_size=512)
 
 
-        self.att_mfh = MFH(2048, cfg.NUM_QUESTION_GLIMPSE*hidden_size, latent_dim=4, output_size=1024, block_count=2)#(batch_size,36,o) or (batch_size,o)
-        self.att_net = nn.Sequential(
-                nn.Linear(2048, 512),
-                nn.Tanh(),
-                nn.Linear(512, 1))
-
         self.pred_mfh = MFH(x_size=1024, y_size=cfg.NUM_QUESTION_GLIMPSE*hidden_size, latent_dim=4, output_size=1024,
                             block_count=2)  # (batch_size,36,o) or (batch_size,o)
         # self.pred_net = nn.Sequential(

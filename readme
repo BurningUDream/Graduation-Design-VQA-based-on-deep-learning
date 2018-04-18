@@ -34,3 +34,12 @@ parser.add_argument("-m",type=str,nargs=1,choices=['c','m','b'],help="model",def
 parser.add_argument("-s",type=str,nargs=1,choices=['cs','csf'],help="model",default='csf')#cs: CS csf: CSF
 parser.add_argument("-g",type=int, action="store",help="fine tune on the conv",default=0)
 
+baseline freq=0 layer=2 csf acc:50.9
+baseline freq=0 layer=1 csf acc:49.9
+baseline freq=0 layer=1 cs  acc:52.2
+MFHMODEL freq=0 layer=0 csf acc:49.1
+baseline freq=0 layer=0 acc:
+baseline freq=0 layer=1 cs grad=1 acc:
+CSFMODEL freq=0 layer=0 acc:
+
+

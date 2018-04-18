@@ -35,6 +35,9 @@ class CSFMODEL(nn.Module):
         self.conv3 = nn.Conv2d(planes, planes * 4, kernel_size=1, bias=False)
         self.bn3 = nn.BatchNorm2d(planes * 4)
 
+        self.relu = nn.ReLU(inplace=True)
+        self.avgpool = nn.AvgPool2d(7, stride=1)
+        self.fc = nn.Linear(2048, 1024)
 
         # 一开始的input是B x S, 但是Embedding S x B -> S x B x I，所以要先转置成S x B
         self.we = nn.Embedding(num_words, emb_size, padding_idx=0)
@@ -55,9 +58,6 @@ class CSFMODEL(nn.Module):
             self.csf2 = CS((512, 7, 7), hidden_size, k_size=512)
             self.csf3 = CS((2048, 7, 7), hidden_size, k_size=512)
 
-        self.relu = nn.ReLU(inplace=True)
-        self.avgpool = nn.AvgPool2d(7, stride=1)
-        self.fc = nn.Linear(2048, 1024)
 
         self.pred_mfh = MFH(x_size=1024, y_size=hidden_size, latent_dim=4, output_size=1024,block_count=2)  # (batch_size,36,o) or (batch_size,o)
         # self.pred_net = nn.Sequential(

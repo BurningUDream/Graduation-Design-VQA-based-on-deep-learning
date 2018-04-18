@@ -43,8 +43,8 @@ parser.add_argument("-e", type=float, action="store", help="extend for score", d
 parser.add_argument('--print-freq', '-p', default=2000, type=int, metavar='N', help='print frequency (default: 1000)')
 
 parser.add_argument("-gpu", type=int, action="store", help="gpu_index", default=1)
-parser.add_argument("-l", type=int, action="store", help="num of CSF layers", default=3)
 parser.add_argument("-f",type=int, action="store",help="use freq in answer rather than grade",default=0)
+parser.add_argument("-l", type=int, action="store", help="num of CSF layers", default=0)
 parser.add_argument("-m",type=str,nargs=1,choices=['c','m','b'],help="model",default='b')#c: CSFMODEL m: MFHMODEL b: MFHBaseline
 parser.add_argument("-s",type=str,nargs=1,choices=['cs','csf'],help="model",default='csf')#cs: CS csf: CSF
 parser.add_argument("-g",type=int, action="store",help="grad to fine tune on the conv",default=0)
