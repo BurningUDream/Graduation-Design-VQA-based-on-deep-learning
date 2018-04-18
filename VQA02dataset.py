@@ -44,8 +44,8 @@ class VQA02Dataset(Dataset):
         with open('../data/vqa02/codebook.json', 'r') as f:
             self.codebook=json.load(f)
         self.img_feature_path='../data/vqa02/{}_feature_2'.format(split)
-        with h5py.File('../data/vqa02/{}-paired.h5'.format(split))[split[0:-4]] as f:
-            paired_data = f
+        with h5py.File('../data/vqa02/{}-paired.h5'.format(split)) as f:
+            paired_data = f[split[0:-4]]
         self.que_id=paired_data['que_id'].value#np.arrray 1维 长774931 array([458752000, 458752001, 458752002, ...,    955086,955088,955097])
         self.img_id=paired_data['img_id'].value
         self.que=paired_data['que'].value#np.arrray 2维 (774931, 14)
