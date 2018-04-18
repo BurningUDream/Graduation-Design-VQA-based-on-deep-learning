@@ -46,25 +46,27 @@ class VQA02Dataset(Dataset):
         self.img_feature_path='../data/vqa02/{}_feature_2'.format(split)
         with h5py.File('../data/vqa02/{}-paired.h5'.format(split)) as f:
             paired_data = f[split[0:-4]]
-        self.que_id=paired_data['que_id'].value#np.arrray 1维 长774931 array([458752000, 458752001, 458752002, ...,    955086,955088,955097])
-        self.img_id=paired_data['img_id'].value
-        self.que=paired_data['que'].value#np.arrray 2维 (774931, 14)
-        # array([[  0,   0,   0, ...,  24, 103, 436],
-        #        [  0,   0,   0, ...,   9,  15,  80],
-        #        [  0,   0,   0, ...,   1, 260,  42],
-        #        ...,
-        #        [  0,   0,   0, ...,   2,   1,  47],
-        #        [  0,   0,   0, ...,   9, 122,  24],
-        #        [  0,   0,   0, ..., 118,  62,   6]])
-        self.ans=paired_data['ans'].value.astype(np.float32)
-        self.ans_num=paired_data['ans_num'].value.astype(np.float32)
-        self.correct_index=paired_data['correct'].value
-        self.freq_index=paired_data['freq'].value
-        # print("que_id ",self.que_id.shape[0])
-        # print("img_id ",self.img_id.shape[0])
-        # print("que ",self.que.shape[0])
-        # print("ans ",self.ans.shape[0])
-        # print("correct_index ",self.correct_index.shape[0])
+            # np.arrray 1维 长774931 array([458752000, 458752001, 458752002, ...,    955086,955088,955097])
+            self.que_id = paired_data['que_id'].value
+            self.img_id = paired_data['img_id'].value
+            self.que = paired_data['que'].value  # np.arrray 2维 (774931, 14)
+            # array([[  0,   0,   0, ...,  24, 103, 436],
+            #        [  0,   0,   0, ...,   9,  15,  80],
+            #        [  0,   0,   0, ...,   1, 260,  42],
+            #        ...,
+            #        [  0,   0,   0, ...,   2,   1,  47],
+            #        [  0,   0,   0, ...,   9, 122,  24],
+            #        [  0,   0,   0, ..., 118,  62,   6]])
+            self.ans = paired_data['ans'].value.astype(np.float32)
+            self.ans_num = paired_data['ans_num'].value.astype(np.float32)
+            self.correct_index = paired_data['correct'].value
+            self.freq_index = paired_data['freq'].value
+            # print("que_id ",self.que_id.shape[0])
+            # print("img_id ",self.img_id.shape[0])
+            # print("que ",self.que.shape[0])
+            # print("ans ",self.ans.shape[0])
+            # print("correct_index ",self.correct_index.shape[0])
+
 
     def load_feature(self,dir):
         print('[Load] image feature in {}'.format(dir))
