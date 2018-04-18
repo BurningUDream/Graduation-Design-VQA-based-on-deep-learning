@@ -41,9 +41,11 @@ class VQA02Dataset(Dataset):
         print('[Load] raw data for {}'.format(split))
         self.extend=float(extend)
         self.freq=freq
-        self.codebook=json.load(open('../data/vqa02/codebook.json','r'))
+        with open('../data/vqa02/codebook.json', 'r') as f:
+            self.codebook=json.load(f)
         self.img_feature_path='../data/vqa02/{}_feature_2'.format(split)
-        paired_data=h5py.File('../data/vqa02/{}-paired.h5'.format(split))[split[0:-4]]
+        with h5py.File('../data/vqa02/{}-paired.h5'.format(split))[split[0:-4]] as f:
+            paired_data = f
         self.que_id=paired_data['que_id'].value#np.arrray 1维 长774931 array([458752000, 458752001, 458752002, ...,    955086,955088,955097])
         self.img_id=paired_data['img_id'].value
         self.que=paired_data['que'].value#np.arrray 2维 (774931, 14)
@@ -85,7 +87,8 @@ class VQA02Dataset(Dataset):
         item=[]
         item.append(self.que[i])#[index of word] ndarray 1d
         filename="%012d"%(self.img_id[i])+".npy"
-        img_feature=np.load(os.path.join(self.img_feature_path,filename))
+        with np.load(os.path.join(self.img_feature_path,filename)) as f:
+            img_feature=f
         item.append(img_feature)#image feature  3d ndarray (2048,7,7)
         if self.freq:
             item.append(self.ans_num[i])#1d ndarray [score(float32) of N candidate answers for this question]
