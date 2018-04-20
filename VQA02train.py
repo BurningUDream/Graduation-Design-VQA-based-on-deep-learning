@@ -261,7 +261,7 @@ def validate(val_loader, model, criterion, epoch):
         _, indexs = torch.max(score.data, dim=1)#tensor (bs,)
         correct_batch = list(map(lambda x, y: 1 if x == y else 0, indexs, sample[3])).count(1)
         right += correct_batch
-        if i==2000:
+        if i==10000:
             break
     accuracy=100.0*float(right)/float(amount)
     print('[%5d] accuracy: %.3f' % (epoch, 100.0*float(right)/float(amount)))
