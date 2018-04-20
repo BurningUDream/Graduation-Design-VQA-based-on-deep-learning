@@ -48,6 +48,7 @@ parser.add_argument("-l", type=int, action="store", help="num of CSF layers", de
 parser.add_argument("-m",type=str,nargs=1,choices=['c','m','b'],help="model",default='b')#c: CSFMODEL m: MFHMODEL b: MFHBaseline
 parser.add_argument("-s",type=str,nargs=1,choices=['cs','csf'],help="model",default='csf')#cs: CS csf: CSF
 parser.add_argument("-g",type=int, action="store",help="grad to fine tune on the conv",default=0)
+parser.add_argument("-co",type=int, action="store",help="co-attention",default=0)
 
 args = parser.parse_args()
 
@@ -110,9 +111,9 @@ def main():
     if args.m=='c':
         model = CSFMODEL(args.l, args.s, args.g, len(train_set.codebook['itow']), len(train_set.codebook['itoa']) + 1, hidden_size=1024, emb_size=emb_size)
     elif args.m=='m':
-        model = MFHMODEL(args.l, args.s, args.g, len(train_set.codebook['itow']), len(train_set.codebook['itoa']) + 1, hidden_size=1024, emb_size=emb_size,co_att=False)
+        model = MFHMODEL(args.l, args.s, args.g, len(train_set.codebook['itow']), len(train_set.codebook['itoa']) + 1, hidden_size=1024, emb_size=emb_size,co_att=args.co)
     else:
-        model = MFHBaseline(args.l, args.s, args.g, len(train_set.codebook['itow']), len(train_set.codebook['itoa']) + 1, hidden_size=1024, emb_size=emb_size, co_att=False)
+        model = MFHBaseline(args.l, args.s, args.g, len(train_set.codebook['itow']), len(train_set.codebook['itoa']) + 1, hidden_size=1024, emb_size=emb_size, co_att=args.co)
 
 
     total_param = 0
@@ -161,7 +162,7 @@ def main():
     best_epoch = -1
     for epoch in range(1, args.epoch + 1):  # 每一个epoch遍历所有batch
         scheduler.step()
-        loss = train(train_loader, model, criterion, optimizer, epoch, val_loader)
+        loss = train(train_loader, model, criterion, optimizer, epoch)
         acc = validate(val_loader, model, criterion, epoch)  # 所有batch，所有样本的总和accuracy
         if acc > best_acc:
             is_best = True
@@ -201,7 +202,7 @@ def extract_embedding(filepath):
     return word_vec, embedding_size
 
 
-def train(train_loader, model, criterion, optimizer, epoch,val_loader):
+def train(train_loader, model, criterion, optimizer, epoch):
     batch_time = AverageMeter()
     data_time = AverageMeter()
     losses = AverageMeter()
@@ -241,8 +242,6 @@ def train(train_loader, model, criterion, optimizer, epoch,val_loader):
                 'Loss {loss.val:.4f} ({loss.avg:.4f})'.format(
                     epoch, i, len(train_loader), batch_time=batch_time,
                     data_time=data_time, loss=losses))
-
-            validate(val_loader, model, criterion, epoch)
     return losses.avg
 
 
@@ -262,9 +261,7 @@ def validate(val_loader, model, criterion, epoch):
         _, indexs = torch.max(score.data, dim=1)#tensor (bs,)
         correct_batch = list(map(lambda x, y: 1 if x == y else 0, indexs, sample[3])).count(1)
         right += correct_batch
-        if i in [20,40,60,80,100]:
-            print("[size test] sample[0] size: {}\n score size {}\n indexs: {}\n sample[3] size: {}\n".format(sample[0].size(),score.size(),indexs,sample[3]))
-        if i==100:
+        if i==2000:
             break
     accuracy=100.0*float(right)/float(amount)
     print('[%5d] accuracy: %.3f' % (epoch, 100.0*float(right)/float(amount)))

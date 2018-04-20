@@ -41,11 +41,11 @@ class CSFMODEL(nn.Module):
 
         # 一开始的input是B x S, 但是Embedding S x B -> S x B x I，所以要先转置成S x B
         self.we = nn.Embedding(num_words, emb_size, padding_idx=0)
-        self.gru = nn.GRU(input_size=emb_size,
+        self.lstm = nn.LSTM(input_size=emb_size,
                           hidden_size=hidden_size,
                           num_layers=1,
                           batch_first=True)
-        self.grudp = nn.Dropout(0.3)
+        self.lstmdp = nn.Dropout(0.3)
 
         # CSF(img_size, h_size, latent_dim, output_size, block_count)  img_size=[C,H,W]
         if submodel=='csf':
@@ -124,8 +124,9 @@ class CSFMODEL(nn.Module):
         # (bs,14) => (bs,14,300) question为14个word index, list 1d length 14, 每次forward都只对一个batch #2d tensor
         emb = F.tanh(self.we(que))
         # (bs, 14,300)->(1, bs, 512) question vector 只取最后的H (num_layers * num_directions, batch_size, hidden_size) 所以要squeeze(dim=0)
-        _, h = self.gru(emb)
-        h = self.grudp(h).squeeze(dim=0)  # (bs, 512)
+        _, hn = self.lstm(emb)
+        h, _ = hn  # (1, bs, 1024)
+        h = self.lstmdp(h).squeeze(dim=0)  # (bs, 512)
 
         # process image tensor
         origin = img.clone()

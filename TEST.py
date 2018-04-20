@@ -22,9 +22,9 @@ from MFHMODEL import MFHMODEL
 from MFHBaseline import MFHBaseline
 from modules import MFH,CS,CSF
 
-model=MFHMODEL(layers=3,submodel='cs',grad=1,num_words=11896,num_ans=3098,hidden_size=1024)
-# model=CSFMODEL(layers=3,num_words=11896,num_ans=3098,hidden_size=1024)
-# model=MFHBaseline(layers=0,num_words=11896,num_ans=3098,hidden_size=1024)
+# model=MFHMODEL(layers=3,submodel='cs',grad=1,num_words=11896,num_ans=3098,hidden_size=1024)
+# model=CSFMODEL(layers=3,submodel='cs',grad=1,num_words=11896,num_ans=3098,hidden_size=1024)
+model=MFHBaseline(layers=0,submodel='cs',grad=1,num_words=11896,num_ans=3098,hidden_size=1024,co_att=True)
 # model=MFH([2048,7,7],y_size=1024,latent_dim=4,output_size=1024, block_count=2)
 # model=CSF([2048,7,7],h_size=1024,latent_dim=4,output_size=1024, block_count=2)
 # model=CS([2048,7,7],h_size=1024,latent_dim=4,)
@@ -38,5 +38,11 @@ ouput=model.forward(que,img)
 print(ouput.size())
 print(ouput)
 
-
-
+# model=myresnet152(pretrained=True)
+# ms=list(model.layer4.modules())
+# print(len(ms))
+# print(ms[0])
+# print('##################################################################')
+# print(ms[1])
+# print('##################################################################')
+# print(ms[2])

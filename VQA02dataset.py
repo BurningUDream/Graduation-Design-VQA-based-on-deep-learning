@@ -89,9 +89,9 @@ class VQA02Dataset(Dataset):
         item=[]
         item.append(self.que[i])#[index of word] ndarray 1d
         filename="%012d"%(self.img_id[i])+".npy"
-        with np.load(os.path.join(self.img_feature_path,filename)) as f:
-            img_feature=f
+        img_feature = np.load(os.path.join(self.img_feature_path,filename))
         item.append(img_feature)#image feature  3d ndarray (2048,7,7)
+        del img_feature
         if self.freq:
             item.append(self.ans_num[i])#1d ndarray [score(float32) of N candidate answers for this question]
             item.append(self.freq_index[i])#int64  correct answer index
