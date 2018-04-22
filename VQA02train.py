@@ -38,7 +38,7 @@ parser = argparse.ArgumentParser(description="VQA")
 parser.add_argument("-bs", type=int, action="store", help="BATCH_SIZE", default=10)
 parser.add_argument("-lr", type=float, action="store", help="learning rate", default=7e-4)
 parser.add_argument("-wd", type=float, action="store", help="weight decay", default=0)
-parser.add_argument("-epoch", type=int, action="store", help="epoch", default=10)
+parser.add_argument("-epoch", type=int, action="store", help="epoch", default=25)
 parser.add_argument("-e", type=float, action="store", help="extend for score", default=1.0)
 parser.add_argument('--print-freq', '-p', default=2000, type=int, metavar='N', help='print frequency (default: 1000)')
 
@@ -261,8 +261,6 @@ def validate(val_loader, model, criterion, epoch):
         _, indexs = torch.max(score.data, dim=1)#tensor (bs,)
         correct_batch = list(map(lambda x, y: 1 if x == y else 0, indexs, sample[3])).count(1)
         right += correct_batch
-        if i==10000:
-            break
     accuracy=100.0*float(right)/float(amount)
     print('[%5d] accuracy: %.3f' % (epoch, 100.0*float(right)/float(amount)))
     model.train()
