@@ -101,23 +101,23 @@ class VQA02Dataset(Dataset):
     def num_ans(self):  # 只读属性
         return len(self.codebook['itoa'])
 
-BATCH_SIZE=10
-train_set = VQA02Dataset('train2014')
-# Data loader Combines a dataset and a sampler, and provides single- or multi-process iterators over the dataset.
-train_loader = torch.utils.data.DataLoader(
-        train_set,
-        batch_size=BATCH_SIZE,
-        shuffle=True,
-        num_workers=2,
-        pin_memory=True,
-    )  # If True, the data loader will copy tensors into CUDA pinned memory before returning them
+# BATCH_SIZE=10
+# train_set = VQA02Dataset('train2014')
+# # Data loader Combines a dataset and a sampler, and provides single- or multi-process iterators over the dataset.
+# train_loader = torch.utils.data.DataLoader(
+#         train_set,
+#         batch_size=BATCH_SIZE,
+#         shuffle=True,
+#         num_workers=2,
+#         pin_memory=True,
+#     )  # If True, the data loader will copy tensors into CUDA pinned memory before returning them
 
-dataiter=iter(train_loader)
-item=next(dataiter)
-print("[size] size of item: ",len(item))
-print("[size] size of question: ",item[0].size())
-print("[size] size of image feature: ",item[1].size())
-print("[size] size of answer: ",item[2].size())
+# dataiter=iter(train_loader)
+# item=next(dataiter)
+# print("[size] size of item: ",len(item))
+# print("[size] size of question: ",item[0].size())
+# print("[size] size of image feature: ",item[1].size())
+# print("[size] size of answer: ",item[2].size())
 
 #
 # val_set = VQA02Dataset('val2014')
