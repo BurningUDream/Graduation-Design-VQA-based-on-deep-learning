@@ -115,6 +115,9 @@ train_loader = torch.utils.data.DataLoader(
 dataiter=iter(train_loader)
 item=next(dataiter)
 print("[size] size of item: ",len(item))
+print("[size] size of question: ",item[0].size())
+print("[size] size of image feature: ",item[1].size())
+print("[size] size of answer: ",item[2].size())
 
 #
 # val_set = VQA02Dataset('val2014')

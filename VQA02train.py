@@ -109,11 +109,11 @@ def main():
 
     # 建立模型
     if args.m=='c':
-        model = CSFMODEL(args.l, args.s, args.g, len(train_set.codebook['itow']), len(train_set.codebook['itoa']) + 1, hidden_size=1024, emb_size=emb_size)
+        model = CSFMODEL(args.l, args.s, args.g, len(train_set.codebook['itow']), len(train_set.codebook['itoa']), hidden_size=1024, emb_size=emb_size)
     elif args.m=='m':
-        model = MFHMODEL(args.l, args.s, args.g, len(train_set.codebook['itow']), len(train_set.codebook['itoa']) + 1, hidden_size=1024, emb_size=emb_size,co_att=args.co)
+        model = MFHMODEL(args.l, args.s, args.g, len(train_set.codebook['itow']), len(train_set.codebook['itoa']), hidden_size=1024, emb_size=emb_size,co_att=args.co)
     else:
-        model = MFHBaseline(args.l, args.s, args.g, len(train_set.codebook['itow']), len(train_set.codebook['itoa']) + 1, hidden_size=1024, emb_size=emb_size, co_att=args.co)
+        model = MFHBaseline(args.l, args.s, args.g, len(train_set.codebook['itow']), len(train_set.codebook['itoa']), hidden_size=1024, emb_size=emb_size, co_att=args.co)
 
 
     total_param = 0
