@@ -58,9 +58,6 @@ class VQA02Dataset(Dataset):
             #        [  0,   0,   0, ...,   9, 122,  24],
             #        [  0,   0,   0, ..., 118,  62,   6]])
             self.ans = paired_data['ans'].value.astype(np.float32)
-            self.ans_num = paired_data['ans_num'].value.astype(np.float32)
-            self.correct_index = paired_data['correct'].value
-            self.freq_index = paired_data['freq'].value
             # print("que_id ",self.que_id.shape[0])
             # print("img_id ",self.img_id.shape[0])
             # print("que ",self.que.shape[0])
@@ -84,7 +81,7 @@ class VQA02Dataset(Dataset):
         return self.que_id.shape[0]
 
     # [question [index of word] ndarray 1d, image feature  3d ndarray (2048,7,7),
-    # 1d ndarray [score(float32) of N candidate answers for this question], #int64  correct answer index]
+    # 1d ndarray [score(float32) of N candidate answers for this question] ]
     def __getitem__(self, i):
         item=[]
         item.append(self.que[i])#[index of word] ndarray 1d
@@ -92,12 +89,7 @@ class VQA02Dataset(Dataset):
         img_feature = np.load(os.path.join(self.img_feature_path,filename))
         item.append(img_feature)#image feature  3d ndarray (2048,7,7)
         del img_feature
-        if self.freq:
-            item.append(self.ans_num[i])#1d ndarray [score(float32) of N candidate answers for this question]
-            item.append(self.freq_index[i])#int64  correct answer index
-        else:
-            item.append(self.ans[i]*self.extend)#1d ndarray [score(float32) of N candidate answers for this question]
-            item.append(self.correct_index[i])#int64  correct answer index
+        item.append(self.ans[i])#1d ndarray [score(float32) of N candidate answers for this question]
         return item
 
     @property

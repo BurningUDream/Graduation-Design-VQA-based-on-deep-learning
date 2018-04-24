@@ -210,16 +210,16 @@ def train(train_loader, model, criterion, optimizer, epoch):
     model.train()  # Sets the module in training mode
     end = time.time()  # 返回当前时间，以秒为单位
     # [question [index of word] ndarray 1d, image feature  3d ndarray (2048,7,7),
-    # 1d ndarray [score(float32) of N candidate answers for this question], #int64  correct answer index]
+    # 1d ndarray [score(float32) of N candidate answers for this question] ]
     # 一个sample是一个经过处理的iterator of batch(相当于iterator of the list of iterator)，2d tensor，sample[i]是所有单个样本第i个的属性的集合的iterator：1d tensor，！！把他当做单个样本处理即可！！
     for i, sample in enumerate(train_loader,1):  # sample即一个batch，dataloader is a iterator of the list of iterator of batch
         data_time.update(time.time() - end)
         # [question_id,ndarray(image feature),question:[list of word index],ndarray(object feature),answers(两种模式)]
         sample_var = [Variable(d).cuda() for d in
-                      list(sample)[0:3]]  # Variable list of iterator [iterator for img, que, [obj], ans]
+                      list(sample)]  # Variable list of iterator [iterator for img, que, [obj], ans]
 
         # input： # img: [bs,2048,7,7] que: (bs,14)
-        # output：3092的1d vector
+        # output：3096的1d vector
         # [question [index of word] ndarray 1d, image feature  3d ndarray (2048,7,7),
         # 1d ndarray [score(float32) of N candidate answers for this question], #int64  correct answer index]
         score = model(*sample_var[:-1])  #que: (bs,14) img: [bs,2048,7,7]
@@ -252,15 +252,19 @@ def validate(val_loader, model, criterion, epoch):
     amount = 0
     right = 0
     bar=progressbar.ProgressBar()
+    # [question [index of word] ndarray 1d, image feature  3d ndarray (2048,7,7),
+    # 1d ndarray [score(float32) of N candidate answers for this question] ]
     for i, sample in enumerate(bar(val_loader), 1):
-        sample_var = [Variable(d).cuda() for d in list(sample)[0:3]]  # Variable list of iterator [iterator for img, que, [obj], ans]
+        sample_var = [Variable(d).cuda() for d in list(sample)]  # Variable list of iterator [iterator for img, que, [obj], ans]
         amount += sample[0].size(0)
         # input： # img: [bs,2048,7,7] que: (bs,14)
-        # output：3097的1d vector(bs,3097)
+        # output：3096的1d vector(bs,3096)
         score = model(*sample_var[:-1])  # img: [bs,2048,7,7] que: (bs,14) #score is a Variable of the list of scores
-        _, indexs = torch.max(score.data, dim=1)#tensor (bs,)
-        correct_batch = list(map(lambda x, y: 1 if x == y else 0, indexs, sample[3])).count(1)
-        right += correct_batch
+        _, indexs = torch.max(score.data, dim=1)#tensor (bs,) sample_var[:-1].data tensor(bs,3096)
+        indexs=indexs.unsqueeze(1)#tensor (bs,) => (bs,1)
+        bs_score=sample_var[-1].data.gather(dim=1, index=indexs)
+        right += bs_score.sum()
+
     accuracy=100.0*float(right)/float(amount)
     print('[%5d] accuracy: %.3f' % (epoch, 100.0*float(right)/float(amount)))
     model.train()
