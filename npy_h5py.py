@@ -22,4 +22,4 @@ def trans(from_dir, to_dir, split):
 
 
 if __name__=='__main__':
-    main()
+    main(root)
