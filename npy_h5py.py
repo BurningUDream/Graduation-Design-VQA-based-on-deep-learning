@@ -18,7 +18,7 @@ def trans(from_dir, to_dir, split):
         for i, filepath in enumerate(glob.glob(pattern), 1):
             id = os.path.basename(filepath).split('.')[0]
             feature = np.load(filepath)
-            f.create_dataset(id, dtype='float64', data=feature)# Save an 3d ndarray (2048,7,7) id(12 string)->3d ndarray (2048,7,7)
+            f.create_dataset(id, dtype='float32', data=feature)# Save an 3d ndarray (2048,7,7) id(12 string)->3d ndarray (2048,7,7)
 
 
 if __name__=='__main__':
