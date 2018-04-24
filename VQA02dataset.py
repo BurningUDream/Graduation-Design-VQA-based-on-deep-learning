@@ -87,7 +87,7 @@ class VQA02Dataset(Dataset):
         item=[]
         item.append(self.que[i])#[index of word] ndarray 1d
         filename="%012d"%(self.img_id[i])
-        img_feature = self.img_feature[filename]
+        img_feature = self.img_feature[filename].value.astype(np.float64)
         item.append(img_feature)#image feature  3d ndarray (2048,7,7)
         del img_feature
         item.append(self.ans[i])#1d ndarray [score(float32) of N candidate answers for this question]
