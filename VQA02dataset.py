@@ -111,6 +111,11 @@ train_loader = torch.utils.data.DataLoader(
         num_workers=2,
         pin_memory=True,
     )  # If True, the data loader will copy tensors into CUDA pinned memory before returning them
+
+dataiter=iter(train_loader)
+item=next(dataiter)
+print("[size] size of item: ",len(item))
+
 #
 # val_set = VQA02Dataset('val2014')
 # val_loader = torch.utils.data.DataLoader(
