@@ -63,6 +63,7 @@ class VQA02Dataset(Dataset):
             # print("que ",self.que.shape[0])
             # print("ans ",self.ans.shape[0])
             # print("correct_index ",self.correct_index.shape[0])
+        self.img_feature = h5py.File('../data/vqa02/{}_img_feature.h5'.format(split))
 
 
     def load_feature(self,dir):
@@ -85,8 +86,8 @@ class VQA02Dataset(Dataset):
     def __getitem__(self, i):
         item=[]
         item.append(self.que[i])#[index of word] ndarray 1d
-        filename="%012d"%(self.img_id[i])+".npy"
-        img_feature = np.load(os.path.join(self.img_feature_path,filename))
+        filename="%012d"%(self.img_id[i])
+        img_feature = self.img_feature[filename]
         item.append(img_feature)#image feature  3d ndarray (2048,7,7)
         del img_feature
         item.append(self.ans[i])#1d ndarray [score(float32) of N candidate answers for this question]
@@ -100,16 +101,16 @@ class VQA02Dataset(Dataset):
     def num_ans(self):  # 只读属性
         return len(self.codebook['itoa'])
 
-# BATCH_SIZE=10
-# train_set = VQA02Dataset('train2014')
-# # Data loader Combines a dataset and a sampler, and provides single- or multi-process iterators over the dataset.
-# train_loader = torch.utils.data.DataLoader(
-#         train_set,
-#         batch_size=BATCH_SIZE,
-#         shuffle=True,
-#         num_workers=2,
-#         pin_memory=True,
-#     )  # If True, the data loader will copy tensors into CUDA pinned memory before returning them
+BATCH_SIZE=10
+train_set = VQA02Dataset('train2014')
+# Data loader Combines a dataset and a sampler, and provides single- or multi-process iterators over the dataset.
+train_loader = torch.utils.data.DataLoader(
+        train_set,
+        batch_size=BATCH_SIZE,
+        shuffle=True,
+        num_workers=2,
+        pin_memory=True,
+    )  # If True, the data loader will copy tensors into CUDA pinned memory before returning them
 #
 # val_set = VQA02Dataset('val2014')
 # val_loader = torch.utils.data.DataLoader(
