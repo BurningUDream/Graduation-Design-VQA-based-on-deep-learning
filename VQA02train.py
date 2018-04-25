@@ -35,7 +35,7 @@ from MFHBaseline import MFHBaseline
 
 parser = argparse.ArgumentParser(description="VQA")
 
-parser.add_argument("-bs", type=int, action="store", help="BATCH_SIZE", default=10)
+parser.add_argument("-bs", type=int, action="store", help="BATCH_SIZE", default=20)
 parser.add_argument("-lr", type=float, action="store", help="learning rate", default=7e-4)
 parser.add_argument("-wd", type=float, action="store", help="weight decay", default=0)
 parser.add_argument("-epoch", type=int, action="store", help="epoch", default=25)
@@ -90,7 +90,7 @@ def main():
         train_set,
         batch_size=BATCH_SIZE,
         shuffle=True,
-        num_workers=2,
+        num_workers=1,
         pin_memory=True,
     )  # If True, the data loader will copy tensors into CUDA pinned memory before returning them
 
@@ -99,7 +99,7 @@ def main():
         val_set,
         batch_size=BATCH_SIZE,
         shuffle=True,
-        num_workers=2,
+        num_workers=1,
         pin_memory=True,
     )
 
