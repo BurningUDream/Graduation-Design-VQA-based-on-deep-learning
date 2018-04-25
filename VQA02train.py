@@ -35,10 +35,10 @@ from MFHBaseline import MFHBaseline
 
 parser = argparse.ArgumentParser(description="VQA")
 
-parser.add_argument("-bs", type=int, action="store", help="BATCH_SIZE", default=40)
+parser.add_argument("-bs", type=int, action="store", help="BATCH_SIZE", default=20)
 parser.add_argument("-lr", type=float, action="store", help="learning rate", default=7e-4)
 parser.add_argument("-wd", type=float, action="store", help="weight decay", default=0)
-parser.add_argument("-epoch", type=int, action="store", help="epoch", default=25)
+parser.add_argument("-epoch", type=int, action="store", help="epoch", default=15)
 parser.add_argument("-e", type=float, action="store", help="extend for score", default=1.0)
 parser.add_argument('--print-freq', '-p', default=2000, type=int, metavar='N', help='print frequency (default: 1000)')
 
