@@ -35,7 +35,7 @@ from MFHBaseline import MFHBaseline
 
 parser = argparse.ArgumentParser(description="VQA")
 
-parser.add_argument("-bs", type=int, action="store", help="BATCH_SIZE", default=20)
+parser.add_argument("-bs", type=int, action="store", help="BATCH_SIZE", default=40)
 parser.add_argument("-lr", type=float, action="store", help="learning rate", default=7e-4)
 parser.add_argument("-wd", type=float, action="store", help="weight decay", default=0)
 parser.add_argument("-epoch", type=int, action="store", help="epoch", default=25)
@@ -106,6 +106,8 @@ def main():
     # initialize word embedding with pretrained
     word_vec, emb_size = extract_embedding('../data/glove/glove.6B.300d.txt')  # dict word->embedding
     logger.debug('[Info] embedding size: {}'.format(emb_size))
+
+    logger.debug('[Info] submodel : {}'.format(args.s))
 
     # 建立模型
     if args.m=='c':
