@@ -77,7 +77,7 @@ def main():
     # 将question word matrix转为index matrix，每一行为一个问题，每一行中有14个数，question word的index向右靠齐，左边填0
     train_que, train_que_id = encode_que(train_data, wtoi, itow) #question index 2d-ndarray and question_id 1d-ndarray
 
-    #返回一个2d-ndarray，内有len(data)个1d-ndarray，每个内部1d-ndarray中为 所有候选answer(3096)的ground-truth score
+    #返回一个2d-ndarray，内有len(data)个1d-ndarray，每个内部1d-ndarray中为 所有候选answer(3097)的ground-truth score
     #返回一个1d-ndarray，分别是每个问题的correct answer在候选答案中对应的index，若没有在候选答案中则为最大的index+1
     train_ans = encode_ans(train_data, atoi, 'train2014')
     train_img_id=encode_image(train_data)

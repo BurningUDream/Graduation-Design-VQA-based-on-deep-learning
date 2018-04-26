@@ -50,7 +50,7 @@ class VQA02Dataset(Dataset):
             # np.arrray 1维 长774931 array([458752000, 458752001, 458752002, ...,    955086,955088,955097])
             self.que_id = paired_data['que_id'].value
             self.img_id = paired_data['img_id'].value
-            self.que = paired_data['que'].value  # np.arrray 2维 (774931, 14)
+            self.que = paired_data['que'].value  # ndarray 2维 (774931, 14)
             # array([[  0,   0,   0, ...,  24, 103, 436],
             #        [  0,   0,   0, ...,   9,  15,  80],
             #        [  0,   0,   0, ...,   1, 260,  42],
@@ -58,7 +58,7 @@ class VQA02Dataset(Dataset):
             #        [  0,   0,   0, ...,   2,   1,  47],
             #        [  0,   0,   0, ...,   9, 122,  24],
             #        [  0,   0,   0, ..., 118,  62,   6]])
-            self.ans = paired_data['ans'].value.astype(np.float32)
+            self.ans = paired_data['ans'].value.astype(np.float32) # ndarray 2维 (774931, 3097)
             # print("que_id ",self.que_id.shape[0])
             # print("img_id ",self.img_id.shape[0])
             # print("que ",self.que.shape[0])
@@ -88,6 +88,7 @@ class VQA02Dataset(Dataset):
     # 1d ndarray [score(float32) of N candidate answers for this question] ]
     def __getitem__(self, i):
         item=[]
+        item.append(self.que_id[i]) #question id int64
         item.append(self.que[i])#[index of word] ndarray 1d
         imgid=str(self.img_id[i])
         img_index= self.imgid_index[imgid]
