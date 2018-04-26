@@ -35,7 +35,7 @@ from MFHBaseline import MFHBaseline
 
 parser = argparse.ArgumentParser(description="VQA")
 
-parser.add_argument("-bs", type=int, action="store", help="BATCH_SIZE", default=20)
+parser.add_argument("-bs", type=int, action="store", help="BATCH_SIZE", default=10)
 parser.add_argument("-lr", type=float, action="store", help="learning rate", default=7e-4)
 parser.add_argument("-wd", type=float, action="store", help="weight decay", default=0)
 parser.add_argument("-epoch", type=int, action="store", help="epoch", default=15)
@@ -45,12 +45,14 @@ parser.add_argument('--print-freq', '-p', default=2000, type=int, metavar='N', h
 parser.add_argument("-gpu", type=int, action="store", help="gpu_index", default=1)
 parser.add_argument("-f",type=int, action="store",help="use freq in answer rather than grade",default=0)
 parser.add_argument("-l", type=int, action="store", help="num of CSF layers", default=0)
-parser.add_argument("-m",type=str,nargs=1,choices=['c','m','b'],help="model",default='b')#c: CSFMODEL m: MFHMODEL b: MFHBaseline
-parser.add_argument("-s",type=str,nargs=1,choices=['cs','csf'],help="model",default='csf')#cs: CS csf: CSF
+parser.add_argument("-m",type=str,choices=('c','m','b'),help="model",default='b')#c: CSFMODEL m: MFHMODEL b: MFHBaseline
+parser.add_argument("-s",type=str,choices=('cs','csf'),help="sub model",default='csf')#cs: CS csf: CSF
 parser.add_argument("-g",type=int, action="store",help="grad to fine tune on the conv",default=0)
 parser.add_argument("-co",type=int, action="store",help="co-attention",default=0)
 
 args = parser.parse_args()
+
+print(args)
 
 if cfg.USE_RANDOM_SEED:
     torch.manual_seed(cfg.SEED)  # Sets the seed for generating random numbers.

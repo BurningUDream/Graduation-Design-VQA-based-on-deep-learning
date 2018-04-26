@@ -173,7 +173,7 @@ def encode_que(data, wtoi, itow):#data：train_data
 def encode_ans(data, atoi, split):#data：train_data
     #此时每个question都有多个答案，需要拟合答案的分布
     # answers: [["net", 1.0], ["netting", 0.3], ["mesh", 0.3]]
-    ans = np.zeros((len(data), len(atoi)), dtype='float16')
+    ans = np.zeros((len(data), len(atoi)), dtype='float32')
     for i, answers in enumerate(map(itemgetter('answers'), data)):  # answers: [["net", 1.0], ["netting", 0.3], ["mesh", 0.3]]
         for answer, score in answers:
             if answer in atoi:
