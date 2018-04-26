@@ -20,11 +20,12 @@ from modules import MFH, GatedTanh, CSF, CS
 from config import cfg
 stdModule = resnet.resnet152(True)
 #print(list(list(stdModule.layer4.children())[0:-1]))
-
+from ipdb import set_trace
 
 class MFHBaseline(nn.Module):
     def __init__(self, layers, submodel, grad, num_words, num_ans, hidden_size=1024, emb_size=300, co_att=False, inplanes=512 * 4, planes=512, stride=1):
         super(MFHBaseline, self).__init__()
+        print('[info] MFHBaseline grad:', grad)
         self.layers=layers
         self.co_att=co_att
         self.conv1 = nn.Conv2d(inplanes, planes, kernel_size=1, bias=False)
@@ -95,9 +96,9 @@ class MFHBaseline(nn.Module):
 
         if not grad:
             for param in list(self.conv1.parameters()):
-                param.requires_gard = False
+                param.requires_grad = False
             for param in list(self.bn1.parameters()):
-                param.requires_gard = False
+                param.requires_grad = False
 
         stdconv2 = list(stdModule.layer4.children())[2].conv2
         self.conv2.weight = nn.Parameter(list(stdconv2.parameters())[0].data.clone())
@@ -108,9 +109,9 @@ class MFHBaseline(nn.Module):
 
         if (not grad) or (grad and layers < 3):
             for param in list(self.conv2.parameters()):
-                param.requires_gard = False
+                param.requires_grad = False
             for param in list(self.bn2.parameters()):
-                param.requires_gard = False
+                param.requires_grad = False
 
         stdconv3 = list(stdModule.layer4.children())[2].conv3
         self.conv3.weight = nn.Parameter(list(stdconv3.parameters())[0].data.clone())
@@ -121,9 +122,9 @@ class MFHBaseline(nn.Module):
 
         if (not grad) or (grad and layers < 2):
             for param in list(self.conv3.parameters()):
-                param.requires_gard = False
+                param.requires_grad = False
             for param in list(self.bn3.parameters()):
-                param.requires_gard = False
+                param.requires_grad = False
 
     def forward(self, que, img):  # img: [bs,2048,7,7] que: (bs,14)
 

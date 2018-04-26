@@ -1,7 +1,7 @@
 import sys
 from config import cfg
-sys.path.insert(0, cfg.VQA_TOOL + '/PythonHelperTools/vqaTools')
-sys.path.insert(0, cfg.VQA_TOOL + '/PythonEvaluationTools')
+sys.path.insert(0, './vqa-tools/PythonHelperTools/vqaTools')
+sys.path.insert(0, './vqa-tools/PythonEvaluationTools')
 from vqa import VQA
 from vqaEvaluation.vqaEval import VQAEval
 

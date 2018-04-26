@@ -27,6 +27,8 @@ class MFHMODEL(nn.Module):
         super(MFHMODEL, self).__init__()
         self.layers=layers
         self.co_att=co_att
+        print('[info] MFHMODEL grad:', grad)
+
         self.conv1 = nn.Conv2d(inplanes, planes, kernel_size=1, bias=False)
         self.bn1 = nn.BatchNorm2d(planes)
 
@@ -101,9 +103,9 @@ class MFHMODEL(nn.Module):
 
         if not grad:
             for param in list(self.conv1.parameters()):
-                param.requires_gard = False
+                param.requires_grad = False
             for param in list(self.bn1.parameters()):
-                param.requires_gard = False
+                param.requires_grad = False
 
         stdconv2 = list(stdModule.layer4.children())[2].conv2
         self.conv2.weight = nn.Parameter(list(stdconv2.parameters())[0].data.clone())
@@ -114,9 +116,9 @@ class MFHMODEL(nn.Module):
 
         if (not grad) or (grad and layers < 3):
             for param in list(self.conv2.parameters()):
-                param.requires_gard = False
+                param.requires_grad = False
             for param in list(self.bn2.parameters()):
-                param.requires_gard = False
+                param.requires_grad = False
 
         stdconv3 = list(stdModule.layer4.children())[2].conv3
         self.conv3.weight = nn.Parameter(list(stdconv3.parameters())[0].data.clone())
@@ -127,9 +129,9 @@ class MFHMODEL(nn.Module):
 
         if (not grad) or (grad and layers < 2):
             for param in list(self.conv3.parameters()):
-                param.requires_gard = False
+                param.requires_grad = False
             for param in list(self.bn3.parameters()):
-                param.requires_gard = False
+                param.requires_grad = False
 
     def forward(self, que, img):  # img: [bs,2048,7,7] que: (bs,14)
 

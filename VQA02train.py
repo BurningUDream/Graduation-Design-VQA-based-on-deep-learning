@@ -34,6 +34,7 @@ from resnet import MyResNet,myresnet152
 from CSFMODEL import CSFMODEL
 from MFHMODEL import MFHMODEL
 from MFHBaseline import MFHBaseline
+from ipdb import set_trace
 
 parser = argparse.ArgumentParser(description="VQA")
 
@@ -142,7 +143,6 @@ def main():
         train_set.codebook['itow'])))  # vaild embedding/num of question word
     # 初始化embedding look up table, 由于question是以index of word形式传入的，所以embedding look up table 只要保存index到embedding的对应关系即可
     model.we.weight = nn.Parameter(torch.from_numpy(emb_table))
-
     # BCEWithLogitsLoss：This loss combines a Sigmoid layer and the BCELoss in one single class.
     # 输入为两个3196的vector
     # 得到的答案为3196维，标准答案为vector，3196中每个都有一个score，相当于对每一个候选答案都做一个BCE，然后对所有维度做平均，再对整个batch做平均
@@ -152,7 +152,8 @@ def main():
     else:
         criterion = nn.BCELoss(size_average=False)
 
-    optimizer = torch.optim.Adam(model.parameters(), args.lr, weight_decay=args.wd)
+    optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), args.lr, weight_decay=args.wd)
+    #optimizer = torch.optim.Adam(model.parameters(), args.lr, weight_decay=args.wd)
     scheduler = StepLR(optimizer, step_size=1, gamma=0.5)
     # This flag allows you to enable the inbuilt cudnn auto-tuner to find the best algorithm to use for your hardware.
     # It enables benchmark mode in cudnn.
@@ -240,7 +241,6 @@ def train(train_loader, model, criterion, optimizer, epoch):
 
         batch_time.update(time.time() - end)
         end = time.time()
-
         if i % args.print_freq == 0:
             logger.debug(
                 'Epoch: [{0}][{1}/{2}]\t'
