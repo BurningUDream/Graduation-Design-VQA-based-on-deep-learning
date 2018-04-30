@@ -23,10 +23,11 @@ stdModule = resnet.resnet152(True)
 from ipdb import set_trace
 
 class MFHBaseline(nn.Module):
-    def __init__(self, layers, submodel, grad, num_words, num_ans, hidden_size=1024, emb_size=300, co_att=False, inplanes=512 * 4, planes=512, stride=1):
+    def __init__(self, use_gru, layers, submodel, grad, num_words, num_ans, hidden_size=1024, emb_size=300, co_att=False, inplanes=512 * 4, planes=512, stride=1):
         super(MFHBaseline, self).__init__()
         print('[info] MFHBaseline grad:', grad)
         self.layers=layers
+        self.use_gru=use_gru
         self.co_att=co_att
         self.conv1 = nn.Conv2d(inplanes, planes, kernel_size=1, bias=False)
         self.bn1 = nn.BatchNorm2d(planes)
@@ -47,6 +48,12 @@ class MFHBaseline(nn.Module):
                           hidden_size=hidden_size,
                           num_layers=1,
                           batch_first=True)
+
+        self.gru = nn.GRU(input_size=emb_size,
+                          hidden_size=hidden_size,
+                          num_layers=1,
+                          batch_first=True)
+
         self.lstmdp1 = nn.Dropout(0.3)
         self.lstmdp2 = nn.Dropout(0.3)
 
@@ -134,12 +141,17 @@ class MFHBaseline(nn.Module):
         # (bs, 14,300)->(1, bs, 512) question vector 只取最后的H (num_layers * num_directions, batch_size, hidden_size) 所以要squeeze(dim=0)
         #qoutput  (batch, seq_len, hidden_size * num_directions)=(bs,14,1024)
         #h,c=hn hn:(2, num_layers * num_directions, batch, hidden_size) = (2,1,bs,1024)
-        qouput, hn = self.lstm(emb)
-        h,_=hn#(1, bs, 1024)
+
+        if not self.use_gru:
+            qouput, hn = self.lstm(emb)
+            h,_=hn#(1, bs, 1024)
+        else:
+            _,h = self.gru(emb)#(1, bs, 1024)
+
 
         if not self.co_att:
             h = self.lstmdp1(h).squeeze(dim=0)  # (bs, 1024)
-        else:
+        elif (not self.use_gru) and self.co_att:
             # question attention
             qouput=self.lstmdp2(qouput)  # (bs,14,1024)
             qouput = qouput.permute(0, 2, 1).unsqueeze(3)  # (bs,14,1024) => (bs,1024,14) => (bs,1024,14,1)
@@ -197,7 +209,6 @@ class MFHBaseline(nn.Module):
         #image feature and question feature 结合
         fuse = self.pred_mfh(img_feature, h)  # (bs,1024) (bs,1024) => (bs,2048)
         score = self.pred_net(fuse)#(bs,3098)
-        score=F.softmax(score,dim=1)
         return score
 
 

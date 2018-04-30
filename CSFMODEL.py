@@ -23,9 +23,11 @@ stdModule = resnet.resnet152(True)
 
 #CSFMODEL(args.l, args.s, args.g, len(train_set.codebook['itow']), len(train_set.codebook['itoa']) + 1, hidden_size=1024, emb_size=emb_size)
 class CSFMODEL(nn.Module):
-    def __init__(self, layers, submodel, grad, num_words, num_ans,  hidden_size=512, emb_size=300, inplanes=512 * 4, planes=512, stride=1):
+    def __init__(self, use_gru, layers, submodel, grad, num_words, num_ans,  hidden_size=512, emb_size=300, inplanes=512 * 4, planes=512, stride=1):
         super(CSFMODEL, self).__init__()
         self.layers=layers
+        self.use_gru=use_gru
+
         self.conv1 = nn.Conv2d(inplanes, planes, kernel_size=1, bias=False)
         self.bn1 = nn.BatchNorm2d(planes)
 
@@ -42,6 +44,11 @@ class CSFMODEL(nn.Module):
         # 一开始的input是B x S, 但是Embedding S x B -> S x B x I，所以要先转置成S x B
         self.we = nn.Embedding(num_words, emb_size, padding_idx=0)
         self.lstm = nn.LSTM(input_size=emb_size,
+                          hidden_size=hidden_size,
+                          num_layers=1,
+                          batch_first=True)
+
+        self.gru = nn.GRU(input_size=emb_size,
                           hidden_size=hidden_size,
                           num_layers=1,
                           batch_first=True)
@@ -124,8 +131,13 @@ class CSFMODEL(nn.Module):
         # (bs,14) => (bs,14,300) question为14个word index, list 1d length 14, 每次forward都只对一个batch #2d tensor
         emb = F.tanh(self.we(que))
         # (bs, 14,300)->(1, bs, 512) question vector 只取最后的H (num_layers * num_directions, batch_size, hidden_size) 所以要squeeze(dim=0)
-        _, hn = self.lstm(emb)
-        h, _ = hn  # (1, bs, 1024)
+
+        if not self.use_gru:
+            qouput, hn = self.lstm(emb)
+            h,_=hn#(1, bs, 1024)
+        else:
+            _,h = self.gru(emb)#(1, bs, 1024)
+
         h = self.lstmdp(h).squeeze(dim=0)  # (bs, 512)
 
         # process image tensor
@@ -167,6 +179,5 @@ class CSFMODEL(nn.Module):
 
         fuse = self.pred_mfh(img_feature, h)  # (bs,1024) (bs,512) => (bs,2048)
         score = self.pred_net(fuse)#(bs,3092)
-        score=F.softmax(score,dim=1)
         return score
 

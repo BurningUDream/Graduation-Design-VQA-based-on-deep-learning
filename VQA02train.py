@@ -38,7 +38,7 @@ from ipdb import set_trace
 
 parser = argparse.ArgumentParser(description="VQA")
 
-parser.add_argument("-bs", type=int, action="store", help="BATCH_SIZE", default=10)
+parser.add_argument("-bs", type=int, action="store", help="BATCH_SIZE", default=20)
 parser.add_argument("-lr", type=float, action="store", help="learning rate", default=7e-4)
 parser.add_argument("-wd", type=float, action="store", help="weight decay", default=0)
 parser.add_argument("-epoch", type=int, action="store", help="epoch", default=15)
@@ -52,6 +52,8 @@ parser.add_argument("-m",type=str,choices=('c','m','b'),help="model",default='b'
 parser.add_argument("-s",type=str,choices=('cs','csf'),help="sub model",default='csf')#cs: CS csf: CSF
 parser.add_argument("-g",type=int, action="store",help="grad to fine tune on the conv",default=0)
 parser.add_argument("-co",type=int, action="store",help="co-attention",default=0)
+parser.add_argument("-sig",type=int,action="store",help="use sigmoid rather than softmax",default=0)#cs: CS csf: CSF
+parser.add_argument("-gru",type=int,action="store",help="use GRU rather than LSTM",default=0)#gru or lstm
 
 args = parser.parse_args()
 
@@ -116,11 +118,11 @@ def main():
 
     # 建立模型
     if args.m=='c':
-        model = CSFMODEL(args.l, args.s, args.g, len(train_set.codebook['itow']), len(train_set.codebook['itoa']), hidden_size=1024, emb_size=emb_size)
+        model = CSFMODEL(args.gru, args.l, args.s, args.g, len(train_set.codebook['itow']), len(train_set.codebook['itoa']), hidden_size=1024, emb_size=emb_size)
     elif args.m=='m':
-        model = MFHMODEL(args.l, args.s, args.g, len(train_set.codebook['itow']), len(train_set.codebook['itoa']), hidden_size=1024, emb_size=emb_size,co_att=args.co)
+        model = MFHMODEL(args.gru, args.l, args.s, args.g, len(train_set.codebook['itow']), len(train_set.codebook['itoa']), hidden_size=1024, emb_size=emb_size,co_att=args.co)
     else:
-        model = MFHBaseline(args.l, args.s, args.g, len(train_set.codebook['itow']), len(train_set.codebook['itoa']), hidden_size=1024, emb_size=emb_size, co_att=args.co)
+        model = MFHBaseline(args.gru, args.l, args.s, args.g, len(train_set.codebook['itow']), len(train_set.codebook['itoa']), hidden_size=1024, emb_size=emb_size, co_att=args.co)
 
 
     total_param = 0
@@ -146,15 +148,19 @@ def main():
     # BCEWithLogitsLoss：This loss combines a Sigmoid layer and the BCELoss in one single class.
     # 输入为两个3196的vector
     # 得到的答案为3196维，标准答案为vector，3196中每个都有一个score，相当于对每一个候选答案都做一个BCE，然后对所有维度做平均，再对整个batch做平均
-    if torch.cuda.is_available():
-        model.cuda()
-        criterion = nn.BCELoss(size_average=False).cuda()
+
+    if args.sig:
+        criterion = nn.BCEWithLogitsLoss(size_average=False)
     else:
         criterion = nn.BCELoss(size_average=False)
 
+    if torch.cuda.is_available():
+        model.cuda()
+        criterion.cuda()
+
     optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), args.lr, weight_decay=args.wd)
     #optimizer = torch.optim.Adam(model.parameters(), args.lr, weight_decay=args.wd)
-    scheduler = StepLR(optimizer, step_size=1, gamma=0.5)
+    #scheduler = StepLR(optimizer, step_size=1, gamma=0.5)
     # This flag allows you to enable the inbuilt cudnn auto-tuner to find the best algorithm to use for your hardware.
     # It enables benchmark mode in cudnn.
     # benchmark mode is good whenever your input sizes for your network do not vary.
@@ -168,7 +174,7 @@ def main():
     best_acc = 0.0
     best_epoch = -1
     for epoch in range(1, args.epoch + 1):  # 每一个epoch遍历所有batch
-        scheduler.step()
+        #scheduler.step()
         loss = train(train_loader, model, criterion, optimizer, epoch)
         acc = validate(val_loader, model, criterion, epoch)  # 所有batch，所有样本的总和accuracy
         if acc > best_acc:
@@ -230,8 +236,11 @@ def train(train_loader, model, criterion, optimizer, epoch):
         # output：3096的1d vector
         # [question [index of word] ndarray 1d, image feature  3d ndarray (2048,7,7),
         # 1d ndarray [score(float32) of N candidate answers for this question], #int64  correct answer index]
-        score = model(*sample_var[:-1])  #que: (bs,14) img: [bs,2048,7,7]
-        loss = criterion(score, F.softmax(sample_var[-1],dim=1))  # 虽然是处理一个batch，但loss是一个scalar，是batch内所有样本的loss的均值，但是是一个tensor
+        score = model(*sample_var[:-1]) #(bs,3097) #que: (bs,14) img: [bs,2048,7,7]
+        if args.sig:
+            loss = criterion(F.sigmoid(score), F.sigmoid(sample_var[-1]))  # 虽然是处理一个batch，但loss是一个scalar，是batch内所有样本的loss的均值，但是是一个tensor
+        else:
+            loss = criterion(F.softmax(score,dim=1), F.softmax(sample_var[-1],dim=1))  # 虽然是处理一个batch，但loss是一个scalar，是batch内所有样本的loss的均值，但是是一个tensor
 
         losses.update(loss.data[0])  # loss.data和sample[0]都是tensor sample[0].size()会返回一个object，sample[0].size(0)会返回一个值
 
