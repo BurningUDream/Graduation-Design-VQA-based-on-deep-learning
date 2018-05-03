@@ -55,7 +55,6 @@ baseline freq=0 layer=3 cs  acc:52.29
 
 baseline freq=0 layer=2 cs  grad=1 acc:55.64
 
-
 MFHMODEL freq=0 layer=0 cs  acc:55.18
 
 MFHMODEL freq=0 layer=0 cs co_att acc:48.2

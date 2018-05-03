@@ -38,7 +38,7 @@ from ipdb import set_trace
 
 parser = argparse.ArgumentParser(description="VQA")
 
-parser.add_argument("-bs", type=int, action="store", help="BATCH_SIZE", default=20)
+parser.add_argument("-bs", type=int, action="store", help="BATCH_SIZE", default=10)
 parser.add_argument("-lr", type=float, action="store", help="learning rate", default=7e-4)
 parser.add_argument("-wd", type=float, action="store", help="weight decay", default=0)
 parser.add_argument("-epoch", type=int, action="store", help="epoch", default=15)
@@ -54,9 +54,11 @@ parser.add_argument("-g",type=int, action="store",help="grad to fine tune on the
 parser.add_argument("-co",type=int, action="store",help="co-attention",default=0)
 parser.add_argument("-sig",type=int,action="store",help="use sigmoid rather than softmax",default=0)#cs: CS csf: CSF
 parser.add_argument("-gru",type=int,action="store",help="use GRU rather than LSTM",default=0)#gru or lstm
+parser.add_argument("-dey", type=float, action="store", help="learning rate decay", default=0.5)
 
 args = parser.parse_args()
 
+#print(args)
 
 if cfg.USE_RANDOM_SEED:
     torch.manual_seed(cfg.SEED)  # Sets the seed for generating random numbers.
@@ -82,11 +84,11 @@ def main():
     fh.setFormatter(formatter)  # 设置每条info开头格式
     logger.addHandler(fh)  # 把FileHandler/StreamHandler加入logger
     logger.addHandler(sh)
-    logger.debug('[Info] arg: {}'.format(args))
+
     # select device
     torch.cuda.set_device(args.gpu)
     logger.debug('[Info] use gpu: {}'.format(torch.cuda.current_device()))
-
+    logger.debug('[Info] args: {}'.format(args))
     # data
     logger.debug('[Info] init dataset')
 
@@ -172,10 +174,16 @@ def main():
     is_best = False
     best_acc = 0.0
     best_epoch = -1
+    pre_acc=-1.0
     for epoch in range(1, args.epoch + 1):  # 每一个epoch遍历所有batch
         #scheduler.step()
         loss = train(train_loader, model, criterion, optimizer, epoch)
         acc = validate(val_loader, model, criterion, epoch)  # 所有batch，所有样本的总和accuracy
+
+        if pre_acc > acc:
+            for param_group in optimizer.param_groups:
+                param_group['lr']=param_group['lr']*args.dey
+        pre_acc = acc
         if acc > best_acc:
             is_best = True
             best_acc = acc
