@@ -42,22 +42,24 @@ baseline 和 MFHMODEL的差别在于MFHMODEL在得到image feature tensor之后�
 
 baseline freq=0 layer=0 csf acc:55.44(51.96)
 
-baseline freq=0 layer=0 co_att acc:
+baseline freq=0 layer=0 co_att acc:48.20
 baseline freq=0 layer=0 cs grad=1 acc:51.46
 
-baseline freq=0 layer=1 csf acc:
+baseline freq=0 layer=1 csf acc:51.65
 baseline freq=0 layer=2 csf acc:
 baseline freq=0 layer=3 csf acc:
 
 baseline freq=0 layer=1 cs  acc:52.26
-baseline freq=0 layer=2 cs  acc:55.5
+baseline freq=0 layer=2 cs  acc:55.50
 baseline freq=0 layer=3 cs  acc:52.29
+
+baseline freq=0 layer=2 cs  grad=1 acc:55.64
 
 
 MFHMODEL freq=0 layer=0 cs  acc:55.18
 
 MFHMODEL freq=0 layer=0 cs co_att acc:48.2
-MFHMODEL freq=0 layer=0 cs grad=1 acc:55.5
+MFHMODEL freq=0 layer=0 cs grad=1 acc:55.50
 
 MFHMODEL freq=0 layer=1 csf acc:
 MFHMODEL freq=0 layer=2 csf acc:

@@ -57,7 +57,6 @@ parser.add_argument("-gru",type=int,action="store",help="use GRU rather than LST
 
 args = parser.parse_args()
 
-print(args)
 
 if cfg.USE_RANDOM_SEED:
     torch.manual_seed(cfg.SEED)  # Sets the seed for generating random numbers.
@@ -83,7 +82,7 @@ def main():
     fh.setFormatter(formatter)  # 设置每条info开头格式
     logger.addHandler(fh)  # 把FileHandler/StreamHandler加入logger
     logger.addHandler(sh)
-
+    logger.debug('[Info] arg: {}'.format(args))
     # select device
     torch.cuda.set_device(args.gpu)
     logger.debug('[Info] use gpu: {}'.format(torch.cuda.current_device()))

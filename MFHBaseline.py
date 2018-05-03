@@ -92,7 +92,6 @@ class MFHBaseline(nn.Module):
             elif isinstance(m, nn.BatchNorm2d):
                 m.weight.data.fill_(1)
                 m.bias.data.zero_()
-        set_trace()
         #resnet最后三层的初始化。并决定要不要继续训练这3层
         stdconv1 = list(stdModule.layer4.children())[2].conv1
         self.conv1.weight = nn.Parameter(list(stdconv1.parameters())[0].data.clone())
