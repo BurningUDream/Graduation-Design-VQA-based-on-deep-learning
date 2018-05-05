@@ -72,7 +72,13 @@ logger.setLevel(logging.DEBUG)  # 接收DEBUG即以上的log info
 
 
 def main():
-    fh = logging.FileHandler('./current_{}_freq_{}_layer_{}_{}_g_{}_co_{}.log'.format(args.m,args.f,args.l,args.s,args.g,args.co))  # log info 输入到文件
+    record_file='./current_{}_freq_{}_layer_{}_{}_g_{}_co_{}_{}.log'.format(args.m,args.f,args.l,args.s,args.g,args.co,args.dey)
+    if args.sig:
+        record_file+='_sig'
+    if args.gru:
+        record_file+='_gru'
+
+    fh = logging.FileHandler(record_file)  # log info 输入到文件
     fh.setLevel(logging.DEBUG)
     sh = logging.StreamHandler(sys.stdout)  # log info 输入到屏幕
     sh.setLevel(logging.DEBUG)

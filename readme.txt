@@ -49,11 +49,12 @@ baseline freq=0 layer=1 csf acc:51.65
 baseline freq=0 layer=2 csf acc:
 baseline freq=0 layer=3 csf acc:
 
-baseline freq=0 layer=1 cs  acc:52.26
+baseline freq=0 layer=1 cs  acc:53.72
 baseline freq=0 layer=2 cs  acc:55.50
 baseline freq=0 layer=3 cs  acc:52.29
 
 baseline freq=0 layer=2 cs  grad=1 acc:55.64
+baseline freq=0 layer=0 cs sig gru acc:54.15
 
 MFHMODEL freq=0 layer=0 cs  acc:55.18
 
