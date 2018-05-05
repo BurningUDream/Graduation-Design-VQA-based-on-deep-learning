@@ -40,10 +40,16 @@ parser.add_argument("-gru",type=int,action="store",help="use GRU rather than LST
 baseline 和 CSFMODEL的差别在于baseline可以选择用co-attention，并且用LSTM，CSFMODEL用GRU
 baseline 和 MFHMODEL的差别在于MFHMODEL在得到image feature tensor之后并没有直接转为image feature vector而是再与question feature做了一次权重计算然后加权和
 
-baseline freq=0 layer=0 csf acc:55.44(51.96)
+baseline freq=0 layer=0 cs acc:55.44(51.96)
 
 baseline freq=0 layer=0 co_att acc:48.20
 baseline freq=0 layer=0 cs grad=1 acc:51.46
+
+baseline freq=0 layer=0 cs dey=1 acc:
+baseline freq=0 layer=0 cs dey=0.5 acc:
+baseline freq=0 layer=0 cs dey=0.1 acc:
+baseline freq=0 layer=0 cs sig acc:
+
 
 baseline freq=0 layer=1 csf acc:51.65
 baseline freq=0 layer=2 csf acc:

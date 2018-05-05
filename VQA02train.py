@@ -54,7 +54,7 @@ parser.add_argument("-g",type=int, action="store",help="grad to fine tune on the
 parser.add_argument("-co",type=int, action="store",help="co-attention",default=0)
 parser.add_argument("-sig",type=int,action="store",help="use sigmoid rather than softmax",default=0)#cs: CS csf: CSF
 parser.add_argument("-gru",type=int,action="store",help="use GRU rather than LSTM",default=0)#gru or lstm
-parser.add_argument("-dey", type=float, action="store", help="learning rate decay", default=0.5)
+parser.add_argument("-dey", type=float, action="store", help="learning rate decay", default=1)
 
 args = parser.parse_args()
 
@@ -72,12 +72,13 @@ logger.setLevel(logging.DEBUG)  # 接收DEBUG即以上的log info
 
 
 def main():
-    record_file='./current_{}_freq_{}_layer_{}_{}_g_{}_co_{}_{}.log'.format(args.m,args.f,args.l,args.s,args.g,args.co,args.dey)
+    record_file='./current_{}_freq_{}_layer_{}_{}_g_{}_co_{}_{}'.format(args.m,args.f,args.l,args.s,args.g,args.co,args.dey)
     if args.sig:
         record_file+='_sig'
     if args.gru:
         record_file+='_gru'
 
+    record_file+='.log'
     fh = logging.FileHandler(record_file)  # log info 输入到文件
     fh.setLevel(logging.DEBUG)
     sh = logging.StreamHandler(sys.stdout)  # log info 输入到屏幕
