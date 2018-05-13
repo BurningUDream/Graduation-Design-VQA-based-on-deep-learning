@@ -55,6 +55,7 @@ parser.add_argument("-co",type=int, action="store",help="co-attention",default=0
 parser.add_argument("-sig",type=int,action="store",help="use sigmoid rather than softmax",default=0)#cs: CS csf: CSF
 parser.add_argument("-gru",type=int,action="store",help="use GRU rather than LSTM",default=0)#gru or lstm
 parser.add_argument("-dey", type=float, action="store", help="learning rate decay", default=1)
+parser.add_argument("-acc", type=int, action="store", help="adjust learning rate by accuracy", default=1)
 
 args = parser.parse_args()
 
@@ -77,6 +78,10 @@ def main():
         record_file+='_sig'
     if args.gru:
         record_file+='_gru'
+    if args.acc:
+        record_file+='_acc'
+    else:
+        record_file+='_loss'
 
     record_file+='.log'
     fh = logging.FileHandler(record_file)  # log info 输入到文件
@@ -182,15 +187,24 @@ def main():
     best_acc = 0.0
     best_epoch = -1
     pre_acc=-1.0
+    pre_loss=float('inf')
     for epoch in range(1, args.epoch + 1):  # 每一个epoch遍历所有batch
         #scheduler.step()
         loss = train(train_loader, model, criterion, optimizer, epoch)
         acc = validate(val_loader, model, criterion, epoch)  # 所有batch，所有样本的总和accuracy
 
-        if pre_acc > acc:
+        if args.acc and pre_acc >= acc:
+            logger.debug('learning rate decay at epoch {}'.format(epoch))
             for param_group in optimizer.param_groups:
                 param_group['lr']=param_group['lr']*args.dey
+        elif (not args.acc) and pre_loss <= loss:
+            logger.debug('learning rate decay at epoch {}'.format(epoch))
+            for param_group in optimizer.param_groups:
+                param_group['lr']=param_group['lr']*args.dey
+
         pre_acc = acc
+        pre_loss=loss
+
         if acc > best_acc:
             is_best = True
             best_acc = acc

@@ -37,6 +37,7 @@ parser.add_argument("-s",type=str,nargs=1,choices=['cs','csf'],help="model",defa
 parser.add_argument("-g",type=int, action="store",help="fine tune on the conv",default=0)
 parser.add_argument("-sig",type=int,action="store",help="use sigmoid rather than softmax",default=0)#cs: CS csf: CSF
 parser.add_argument("-dey", type=float, action="store", help="learning rate decay", default=1)
+parser.add_argument("-loss", type=int, action="store", help="adjust learning rate by loss", default=0)
 
 baseline 和 CSFMODEL的差别在于baseline可以选择用co-attention，并且用LSTM，CSFMODEL用GRU
 baseline 和 MFHMODEL的差别在于MFHMODEL在得到image feature tensor之后并没有直接转为image feature vector而是再与question feature做了一次权重计算然后加权和
