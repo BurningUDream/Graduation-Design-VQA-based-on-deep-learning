@@ -209,5 +209,3 @@ class MFHBaseline(nn.Module):
         fuse = self.pred_mfh(img_feature, h)  # (bs,1024) (bs,1024) => (bs,2048)
         score = self.pred_net(fuse)#(bs,3098)
         return score
-
-
